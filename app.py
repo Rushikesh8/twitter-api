@@ -35,9 +35,10 @@ class GenerateTweetAPI(MethodView):
         if not prompt:
             return jsonify({"error": "Invalid prompt"}), 400
 
+        formatted_prompt = f"Generate tweet based on prompt topic: {prompt}"
         response = client.completions.create(
             model="gpt-3.5-turbo-instruct",
-            prompt=prompt,
+            prompt=formatted_prompt,
             max_tokens=280,
             temperature=0.7
         )
