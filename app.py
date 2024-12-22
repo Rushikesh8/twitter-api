@@ -7,7 +7,6 @@ import os
 import requests
 import random
 from flask_apscheduler import APScheduler
-import time
 
 load_dotenv()
 
@@ -38,6 +37,9 @@ twitter_client = tweepy.Client(bearer_token=BEARER_TOKEN,
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
+@app.route('/ping')
+def home():
+    return "Pong"
 class GenerateTweetAPI(MethodView):
     def post(self):
         data = request.json
