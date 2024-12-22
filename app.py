@@ -5,10 +5,20 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 import requests
+import random
+from flask_apscheduler import APScheduler
+import time
 
 load_dotenv()
 
+class Config:
+    SCHEDULER_API_ENABLED = True
+
 app = Flask(__name__)
+
+app.config.from_object(Config)
+scheduler = APScheduler()
+scheduler.init_app(app)
 
 API_KEY = os.getenv("API_KEY")
 API_SECRET = os.getenv("API_SECRET_KEY")
@@ -104,12 +114,42 @@ class GetUserIdsAPI(MethodView):
             return user_data.get('data', [{}])[0].get('id') 
         return None
 
+def generate_tweet_with_random_prompt():
+    """
+    Generates and posts a tweet using a randomly selected category.
+    """
+    prompt_categories = ["technology", "creative", "inspirational", "philosophy", "education"]
+    chosen_category = random.choice(prompt_categories)
+    formatted_prompt = f"Generate tweet based on the prompt topic: {chosen_category}"
+    response = client.completions.create(
+        model="gpt-3.5-turbo-instruct",
+        prompt=formatted_prompt,
+        max_tokens=280,
+        temperature=0.7
+    )
+    tweet = str(response.choices[0].text).strip()[:280]
+    try:
+        twitter_client.create_tweet(text=tweet)
+        print(f"Tweet posted successfully! Category: {chosen_category} | Tweet: {tweet}")
+    except Exception as e:
+        print(f"Failed to post tweet: {str(e)}")
 
 # Register class-based views
 app.add_url_rule('/generate-tweet', view_func=GenerateTweetAPI.as_view('generate_tweet'))
 app.add_url_rule('/get-user-tweets', view_func=GetUserTweetsAPI.as_view('get_user_tweets'))
 app.add_url_rule('/get_user_ids', view_func=GetUserIdsAPI.as_view('get_user_ids'))
 
+#Uncomment below code to enable the scheduler
+# scheduler.add_job(
+#     id="TweetScheduler",
+#     func=generate_tweet_with_random_prompt,
+#     trigger="interval",
+#     minutes=15
+# )
+
 
 if __name__ == '__main__':
+    # scheduler.start()
     app.run(debug=DEBUG)
+
+    

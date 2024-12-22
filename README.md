@@ -11,6 +11,8 @@ This project is a Flask-based web application that integrates with the Twitter A
 - **Generate Tweet**: Generate a tweet based on a prompt passed to the API, which is then posted to Twitter.
 - **Get User Tweets**: Retrieve the latest tweets from a Twitter user, given their user ID.
 - **Get User IDs**: Retrieve the Twitter user ID from a given username or list of usernames.
+- **Scheduled Tweet Generation and Posting**: Automatically triggers every 15 minutes using APScheduler.
+
 
 ## Requirements
 
